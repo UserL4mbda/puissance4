@@ -251,6 +251,18 @@ func reg_jeton (j Jeton) regjeton {
 	}
 }
 
+func (r regjeton) ET(reg1 regjeton, reg2 regjeton) regjeton{
+	return reg_ET(reg1, reg2)
+}
+
+func (r regjeton) OU(reg1 regjeton, reg2 regjeton) regjeton{
+	return reg_OU(reg1, reg2)
+}
+
+func (r regjeton) FOIS(n int) regjeton{
+	return reg_FOIS(r, n)
+}
+
 //regjeton1 ET regjeton2
 func reg_ET (reg1 regjeton, reg2 regjeton) regjeton{
 	return func (l []Jeton, index int) (int, bool){
@@ -299,7 +311,8 @@ const VALEUR_GAGNANT = 100000
 func evalueGagnant(joueur Jeton, ligne []Jeton) int {
 	//On gagne si l'on a 4 fois la meme couleur
 	numGagnant := 4
-	regle_gagnant := reg_FOIS(reg_jeton(joueur), numGagnant)
+	//regle_gagnant := reg_FOIS(reg_jeton(joueur), numGagnant)
+	regle_gagnant := reg_jeton(joueur).FOIS(numGagnant)
 
 	var gagnant bool
 	for i, _ := range ligne {
