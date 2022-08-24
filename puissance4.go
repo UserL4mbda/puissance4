@@ -251,11 +251,11 @@ func reg_jeton (j Jeton) regjeton {
 	}
 }
 
-func (r regjeton) ET(reg1 regjeton, reg2 regjeton) regjeton{
+func (reg1 regjeton) ET(reg2 regjeton) regjeton{
 	return reg_ET(reg1, reg2)
 }
 
-func (r regjeton) OU(reg1 regjeton, reg2 regjeton) regjeton{
+func (reg1 regjeton) OU(reg2 regjeton) regjeton{
 	return reg_OU(reg1, reg2)
 }
 
@@ -311,7 +311,6 @@ const VALEUR_GAGNANT = 100000
 func evalueGagnant(joueur Jeton, ligne []Jeton) int {
 	//On gagne si l'on a 4 fois la meme couleur
 	numGagnant := 4
-	//regle_gagnant := reg_FOIS(reg_jeton(joueur), numGagnant)
 	regle_gagnant := reg_jeton(joueur).FOIS(numGagnant)
 
 	var gagnant bool
@@ -336,29 +335,19 @@ func evalue3Jeton(joueur Jeton, ligne []Jeton) int {
 	t1j := reg_jeton(joueur)
 
 	//Test 2 jetons
-//	t2j := reg_FOIS(reg_jeton(joueur), 2)
-	t2j := reg_FOIS(t1j, 2)
+	t2j := reg_jeton(joueur).FOIS(2)
 
 	//Test 3 jetons
-//	t3j := reg_FOIS(reg_jeton(joueur), 3)
-	t3j := reg_FOIS(t1j, 3)
+	t3j := reg_jeton(joueur).FOIS(3)
 
-	//Test 3 jetons suivi d'un vide
-	test3v := reg_ET(t3j, t1v)
-	//Test 1 vide suivi de 3 jetons
-	testv3 := reg_ET(t1v, t3j)
-	//Test 3 jetons et un vide OU un vide et 3 jetons
-	test3p0 := reg_OU(test3v, testv3)
 
-	//Test 2 jeton suivi d'un vide puis d'un jeton
-	test2j1v1j := reg_ET(reg_ET(t2j, t1v), t1j)
-	//Test 1 jeton suivi d'un vide puis de 2 jeton
-	test1j1v2j := reg_ET(reg_ET(t1j, t1v), t2j)
-	//Test de l'un ou l'autre des tests precedents
-	test2p1v := reg_OU(test2j1v1j, test1j1v2j)
+	test := (       //Test 3 jetons et 1 vide OU 1 vide et 3 jetons
+			t3j .ET (t1v)) .OU (t1v. ET (t3j)).
+		OU ( // OU
+			//Test 2 jetons et 1 vide et 1 jeton
+			//   OU 1 jeton et 1 vide et 2 jetons
+			(t2j .ET (t1v) .ET (t1j)) .OU ( t1j .ET (t1v) .ET (t2j) ))
 
-	//Test 
-	test := reg_OU(test3p0, test2p1v)
 
 	for i, _ := range ligne {
 		if _, trouve := test(ligne, i); trouve {
@@ -450,43 +439,33 @@ func deep_advice(joueur Jeton, grille Grille, niveau int) (int, int, error) {
 
 	//testons donc chaque coup possible
 	for pos := 0; pos < grille.Col; pos++ {
-		//fmt.Printf("TEST difficulty %v -> position %v", niveau, pos)
 		g, err := grille.PoseJetonCol(joueur, pos)
 		if colNotFull := err == nil; colNotFull {
-			//fmt.Printf("Test colone %v\n", pos)
 			//Si le niveau est zero, on evalue le cout actuel du joueur
 			if niveau == 0 {
 				gainJoueur  := evalueGrille(joueur, g)
 				gainAdverse := evalueGrille(joueur.adversaire(), g)
 				gain        := gainJoueur - gainAdverse
 
-//				fmt.Printf(" Joueur: %v -> Adverse: %v -> Gains %v\n", gainJoueur, gainAdverse, gain)
 				if gain > max_gain {
 					max_gain = gain
 					pos_optimale = pos
 				}
 			}else{
 				//On evalue au moins un coup plus loin
-//				gain_adverse, pos_possible, err := deep_advice(joueur.adversaire(), g, niveau - 1)
 				gain_adverse, _, err := deep_advice(joueur.adversaire(), g, niveau - 1)
 				gain := -gain_adverse
 				if err == nil {
-//					fmt.Printf("TEST difficulty %v -> position %v", niveau, pos)
-//					fmt.Printf(" Gain %v\n", gain)
 					if gain > max_gain {
 						//Si on est gagnant pas besoin de tester les autres possibilite
 						if gain >= VALEUR_GAGNANT {
 							return VALEUR_GAGNANT,  pos, nil
 						}
-						max_gain = gain 
+						max_gain = gain
 						pos_optimale = pos
 					}
 				}else{
-//					fmt.Printf("\n")
-					//Si c'est une erreur grille pleine, on ne fait rien
-					//if err.Error() != "grille pleine" {
-						fmt.Println("Panic ERROR", err)
-					//}
+					fmt.Println("Panic ERROR", err)
 				}
 			}
 		}else{
