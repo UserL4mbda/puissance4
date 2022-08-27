@@ -482,91 +482,10 @@ func deep_advice(joueur Jeton, grille Grille, niveau int) (int, int, error) {
 }
 
 func main() {
-//	v := Vide
-	j := Jaune
-	r := Rouge
-	//jetons := []Jeton{v, j, r}
-	//fmt.Println(v)
-//	for _,v = range jetons{
-//		fmt.Printf("%c\n",v.getRune())
-//		fmt.Printf("%v\n", v.getStr())
-//	}
-
-	grille1 := NouvelleGrille(7,6)
-	grille2 := grille1.Copy()
-//	grille2.RemplaceJetonAt(j,2,3)
-//	grille3 := grille2.InsertJetonAt(r,1,4)
-	grille3 := grille2.RemplaceJetonAt(j,1,1).InsertJetonAt(r,0,0)
-//	fmt.Println(grille1)
-//	fmt.Println(grille2)
-//	fmt.Println(grille3)
-//	fmt.Println()
-//	grille1.Print()
-//	fmt.Println()
-//	grille2.Print()
-//	fmt.Println()
-//	grille3.Print()
-
-	grille4, e := grille3.PoseJetonCol(r, 2)
-	if e != nil {
-		panic(e)
-	}
-//	grille4.Print()
-//	fmt.Println("Col 2 is full:",grille4.ColIsFull(2))
-	grille5, e5 := grille4.PoseJetonCol(r,2)
-	if e5 != nil {
-		panic(e5)
-	}
-	grille5.RemplaceJetonAt(r,0,1).RemplaceJetonAt(j,1,2).RemplaceJetonAt(r,2,2).RemplaceJetonAt(r,0,2).RemplaceJetonAt(j,1,3).RemplaceJetonAt(r,2,3).RemplaceJetonAt(j,2,4).RemplaceJetonAt(r,3,0)
-	grille5.Print()
-
-	reader := bufio.NewReader(os.Stdin)
-	currentGrid := grille5
-
-	fmt.Println(grille5.lines())
-
-	//test_rule()
-
-	//fmt.Println("Evaluation de la grille5:")
-	grille5.Print()
-	//fmt.Printf("Eval pour le joueur Jaune: %v\n", evalueGrille(Jaune, grille5))
-	//fmt.Printf("Eval pour le joueur Rouge: %v\n", evalueGrille(Rouge, grille5))
 
 	bcl_run()
 
 	return
-
-	for {
-		currentGrid.Print()
-		fmt.Print("(col)-> ")
-		text, errr := reader.ReadString('\n')
-		
-		if errr != nil{
-			panic(errr)
-		}
-
-		txt := strings.Replace(text, "\n", "", -1)
-
-		//if strings.Compare("bye", txt) == 0{
-		if txt == "bye" {
-			return
-		}
-
-		entier, errrr := strconv.Atoi(txt)
-		if errrr != nil {
-			continue
-		}
-
-		if entier < 0 || entier >= currentGrid.Col {
-			fmt.Printf("%d out of bounds!\n", entier)
-		}
-		fmt.Printf("%d++ = %d\n", entier, entier+1)
-		currentGrid, e  = currentGrid.PoseJetonCol(r, entier)
-		if e != nil {
-			fmt.Println(e)
-			continue
-		}
-	}
 }
 
 func bcl_run(){
@@ -585,7 +504,6 @@ func bcl_run(){
 		}
 		fmt.Printf("Valeur pour %v: %v\n", Jaune.getStr(), evalueGrille(Jaune, grille))
 		fmt.Printf("Valeur pour %v: %v\n", Rouge.getStr(), evalueGrille(Rouge, grille))
-		//fmt.Println("Choix:",joueur.getStr())
 		position := select_position(grille)
 		grille, _ = grille.PoseJetonCol(joueur, position)
 		if grilleEstGagnant(joueur, grille) {
@@ -593,7 +511,6 @@ func bcl_run(){
 			fmt.Println("BRAVO! Vous avez gagne")
 			return
 		}
-		//_ , posAdversaire :=  advice(joueur.adversaire(), grille)
 		gain , posAdversaire, errT :=  deep_advice(joueur.adversaire(), grille, difficulty)
 		if errT != nil {
 			fmt.Println("ERREUR TROUBLANTE:", errT)
@@ -659,7 +576,6 @@ func select_position(grille Grille) int {
 	for i := 0; i < grille.Col; i++ {
 		if !grille.ColIsFull(i) {
 			valides = append(valides, i)
-			//fmt.Printf("%d",i)
 		}
 	}
 
@@ -677,61 +593,9 @@ func select_position(grille Grille) int {
 		if err == nil && appartient_int(valides, val) {
 			break
 		}
-//		return val
 	}
 	return val
 }
 
-func test_rule(){
 
-	ligne1 := []Jeton{Jaune, Jaune, Jaune, Vide, Vide, Rouge}
-
-	ligne2 := []Jeton{Jaune, Jaune, Jaune, Jaune, Vide, Rouge}
-
-	fmt.Printf("GAGNANT: %v pour %v\n", evalueGagnant(Jaune, ligne1), ligne1)
-	fmt.Printf("GAGNANT: %v pour %v\n", evalueGagnant(Jaune, ligne2), ligne2)
-
-	//TEST rouge ou jaune
-	ligne3 := []Jeton{Jaune,Vide,Rouge}
-	ligne4 := []Jeton{Rouge,Vide,Jaune}
-	ligne5 := []Jeton{Vide,Jaune,Rouge}
-	ligne6 := []Jeton{Vide,Jaune,Jaune,Jaune,Rouge}
-	ligne7 := []Jeton{Rouge,Jaune,Jaune,Jaune,Vide,Rouge}
-	ligne8 := []Jeton{Rouge,Jaune,Jaune,Jaune,Rouge,Rouge}
-	ligne9 := []Jeton{Vide,Jaune,Vide,Jaune,Jaune,Rouge,Rouge}
-	ligne10 := []Jeton{Rouge,Jaune,Jaune,Vide,Jaune,Rouge,Rouge}
-	ligne11 := []Jeton{Rouge,Jaune,Jaune,Jaune,Jaune,Rouge,Rouge}
-
-	test_Jaune := reg_jeton(Jaune)
-	test_Rouge := reg_jeton(Rouge)
-	test_Jaune_OU_Rouge := reg_OU(test_Jaune, test_Rouge)
-
-	test_test(test_Jaune_OU_Rouge, ligne3,0, "TEST JAUNE OU ROUGE")
-	test_test(test_Jaune_OU_Rouge, ligne4,0, "TEST JAUNE OU ROUGE")
-	test_test(test_Jaune_OU_Rouge, ligne5,0, "TEST JAUNE OU ROUGE")
-
-	fmt.Printf("EVALUE3JETONS: %v pour %v\n", evalue3Jeton(Jaune, ligne6), ligne6)
-	fmt.Printf("EVALUE3JETONS: %v pour %v\n", evalue3Jeton(Jaune, ligne7), ligne7)
-	fmt.Printf("EVALUE3JETONS: %v pour %v\n", evalue3Jeton(Jaune, ligne8), ligne8)
-	fmt.Printf("EVALUE3JETONS: %v pour %v\n", evalue3Jeton(Jaune, ligne9), ligne9)
-	fmt.Printf("EVALUE3JETONS: %v pour %v\n", evalue3Jeton(Jaune, ligne10), ligne10)
-
-	fmt.Println()
-	test_evalue_lignes(Jaune,[][]Jeton{ligne1,ligne2,ligne3,ligne4,ligne5,ligne6,ligne7,ligne8,ligne9,ligne10,ligne11})
-}
-
-func test_test(r regjeton, ligne []Jeton, index int, label string) {
-	i, trouve := r(ligne, index)
-	fmt.Printf("%v: index = %v , trouve = %v -> %v\n", label, i, trouve, ligne)
-}
-
-func test_evalue_lignes(joueur Jeton, lignes [][]Jeton) {
-	for _ , val := range lignes {
-		test_evalue_ligne(joueur, val)
-	}
-}
-
-func test_evalue_ligne(joueur Jeton, ligne []Jeton) {
-	fmt.Printf("Evaluation: %v pour ligne -> %v\n", evalueLigne(joueur, ligne), ligne)
-}
 
